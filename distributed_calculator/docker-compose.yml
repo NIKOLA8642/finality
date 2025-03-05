@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - TIME_ADDITION_MS=1000
+      - TIME_SUBTRACTION_MS=1000
+      - TIME_MULTIPLICATIONS_MS=2000
+      - TIME_DIVISIONS_MS=3000
+    networks:
+      - calculator-network
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    depends_on:
+      - orchestrator
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:8080
+      - COMPUTING_POWER=4
+    deploy:
+      # Позволяет масштабировать количество контейнеров агента
+      replicas: 2
+    networks:
+      - calculator-network
+
+networks:
+  calculator-network:
+    driver: bridge
